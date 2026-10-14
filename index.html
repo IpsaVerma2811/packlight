@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="A practical, weather-aware packing planner for your next trip.">
+  <title>Packlight — Weather-aware packing planner</title>
+  <style>
+    :root{--paper:#f7f7f2;--card:#fff;--ink:#222b25;--muted:#737d75;--line:#e4e7df;--green:#315843;--green-dark:#244432;--soft:#edf2e9;--sand:#eee9dc;--orange:#b76e3f;--shadow:0 10px 32px rgba(34,43,37,.045)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9cb99f;outline-offset:2px}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:auto}.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;font-size:19px;font-weight:760;letter-spacing:-.8px}.brand-icon{display:grid;place-items:center;width:35px;height:35px;border-radius:12px;background:var(--green);color:#fff;font-size:18px}
+    .top-note{font-size:11px;letter-spacing:1.5px;color:var(--muted);font-weight:700;text-transform:uppercase}
+    .intro{padding:47px 0 32px;display:flex;justify-content:space-between;align-items:end;gap:30px}.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--green);font-weight:800}
+    h1{font-size:clamp(36px,5vw,57px);letter-spacing:-2.8px;line-height:1.02;margin:13px 0 15px;font-weight:760}.intro p{max-width:500px;margin:0;color:var(--muted);line-height:1.8}
+    .intro-mark{flex:0 0 150px;width:150px;height:130px;border-radius:55% 45% 48% 52%;background:#e9eddf;display:grid;place-items:center;font-size:57px;transform:rotate(-5deg);margin-bottom:4px}
+    .layout{display:grid;grid-template-columns:minmax(290px,.86fr) minmax(0,1.14fr);gap:20px;align-items:start}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:23px;box-shadow:var(--shadow);margin-bottom:17px}
+    .card-head{display:flex;align-items:start;justify-content:space-between;gap:12px}.step{font-size:10px;font-weight:800;letter-spacing:1.7px;color:var(--green);text-transform:uppercase}.card h2{font-size:17px;letter-spacing:-.35px;margin:5px 0 0}.desc{font-size:12px;color:var(--muted);margin:7px 0 0;line-height:1.65}
+    .field{margin-top:18px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:7px}.field input,.field select,.custom-input{width:100%;min-width:0;border:1px solid #dfe4dc;border-radius:10px;background:#fff;padding:12px 13px;color:var(--ink);outline:none}.field input:focus,.field select:focus,.custom-input:focus{border-color:#71937a;box-shadow:0 0 0 3px #eaf1e9}
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:11px}.activity-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.activity{border:1px solid var(--line);border-radius:99px;background:#fff;padding:8px 11px;color:#58645b;font-size:12px;transition:background .15s,border-color .15s}.activity[aria-pressed=true]{background:var(--soft);border-color:#a8bda7;color:var(--green-dark);font-weight:700}
+    .primary{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;border:0;border-radius:11px;background:var(--green);color:#fff;padding:13px 16px;font-weight:750;margin-top:21px;transition:background .15s,transform .15s}.primary:hover{background:var(--green-dark)}.primary:active{transform:translateY(1px)}.primary:disabled{opacity:.6;cursor:wait}
+    .status{font-size:11px;color:var(--muted);margin-top:10px;min-height:17px}.status.error{color:#a25438}
+    .weather{margin-top:18px;border-radius:15px;background:var(--green);color:#fff;padding:18px 19px;position:relative;overflow:hidden}.weather:after{content:"";position:absolute;width:135px;height:135px;border:1px solid #ffffff1c;border-radius:50%;right:-46px;top:-45px;box-shadow:0 0 0 18px #ffffff08,0 0 0 36px #ffffff06;pointer-events:none}
+    .weather-top{display:flex;align-items:start;justify-content:space-between;gap:10px;position:relative;z-index:1}.weather-city{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#d6e2d5;font-weight:750}.temperature{font-size:40px;font-weight:760;letter-spacing:-2px;line-height:1.2;margin-top:7px}.condition{font-size:12px;color:#e0e9dd;margin-top:3px}.weather-icon{font-size:32px}.weather-bottom{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #ffffff28;margin-top:17px;padding-top:12px;font-size:11px;color:#d6e2d5}.weather-note{font-size:10px;line-height:1.55;color:#d6e2d5;margin-top:12px;max-width:450px}
+    .empty{padding:48px 12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8}.empty-emoji{font-size:34px;margin-bottom:10px}
+    .results-head{display:flex;align-items:start;justify-content:space-between;gap:12px}.quiet-btn{background:var(--soft);border:0;border-radius:9px;padding:9px 11px;font-size:11px;font-weight:750;color:var(--green);white-space:nowrap}.quiet-btn:hover{background:#e2ebdf}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:20px 0 15px}.stat{background:#f5f6f1;border-radius:11px;padding:12px 10px;min-width:0}.stat strong{display:block;font-size:21px;letter-spacing:-.7px;line-height:1.2;overflow-wrap:anywhere}.stat span{display:block;font-size:10px;color:var(--muted);margin-top:5px}
+    .progress-track{height:6px;border-radius:9px;background:#e9ede6;overflow:hidden;margin:13px 0 16px}.progress-fill{height:100%;width:0;background:#63866a;border-radius:9px;transition:width .2s}.progress-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted)}
+    .category{margin-top:22px}.category-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.category-head strong{font-size:12px}.category-count{font-size:10px;color:var(--muted)}.items{display:flex;flex-direction:column}.item{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid #eff0eb;cursor:pointer}.item:last-child{border-bottom:0}.item input{accent-color:var(--green);width:16px;height:16px;flex:0 0 16px}.item-name{font-size:12px;flex:1;line-height:1.45}.item input:checked+.item-name{text-decoration:line-through;color:#8b938c}.item-weight{font-size:10px;color:#879187;white-space:nowrap}
+    .advice{background:#f2f5ed;border-radius:11px;padding:13px;font-size:12px;line-height:1.7;color:#516650;margin-top:17px}.custom-row{display:grid;grid-template-columns:minmax(0,1fr) 76px auto;gap:7px;margin-top:11px}.custom-input{padding:10px 11px;font-size:12px}.add-btn{background:var(--green);color:#fff;border:0;border-radius:9px;padding:0 13px;font-size:12px;font-weight:750}.toast{min-height:17px;font-size:11px;color:var(--green);margin-top:8px}
+    .tips-grid{display:grid;grid-template-columns:1fr;gap:15px;margin-top:18px}.tip{display:flex;gap:12px;align-items:start}.tip-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:#f1f2e9;font-size:17px}.tip strong{font-size:12px}.tip p{font-size:11px;color:var(--muted);line-height:1.65;margin:3px 0 0}
+    footer{padding:24px 0 32px;text-align:center;color:#8a938a;font-size:10px;line-height:1.8}footer a{color:var(--green)}
+    @media(max-width:760px){.wrap{width:min(100% - 28px,580px)}.intro{padding:36px 0 25px}.intro-mark{display:none}.layout{grid-template-columns:1fr;gap:0}.card{padding:19px}.topbar{height:66px}.top-note{font-size:9px;letter-spacing:1px}h1{letter-spacing:-1.9px}.stats{gap:6px}.stat{padding:11px 8px}.stat strong{font-size:19px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Packlight home"><span class="brand-icon" aria-hidden="true">↗</span>packlight<span style="color:#8eaa87">.</span></a>
+      <div class="top-note">A little more room for the journey</div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div>
+          <div class="eyebrow">P32 · Travel, thoughtfully</div>
+          <h1>Pack for the trip.<br>Not every possibility.</h1>
+          <p>Weather, plans, and a little common sense. Build a packing list that fits your trip — and your bag.</p>
+        </div>
+        <div class="intro-mark" aria-hidden="true">🧳</div>
+      </section>
+
+      <div class="layout">
+        <div>
+          <section class="card" aria-labelledby="plan-title">
+            <div class="card-head"><div><div class="step">01 / The details</div><h2 id="plan-title">Where are you headed?</h2><p class="desc">Start with the basics. You can change them any time.</p></div></div>
+            <div class="field"><label for="destination">Destination city</label><input id="destination" type="text" placeholder="e.g. Jaipur, Tokyo, London" autocomplete="off"></div>
+            <div class="field twocol">
+              <div><label for="departure">Leaving</label><input id="departure" type="date"></div>
+              <div><label for="return">Coming back</label><input id="return" type="date"></div>
+            </div>
+            <div class="field"><label for="trip-type">Kind of trip</label><select id="trip-type"><option value="casual">A bit of everything</option><option value="backpacking">Backpacking</option><option value="business">Work trip</option><option value="beach">Beach break</option><option value="outdoors">Outdoors & adventure</option></select></div>
+            <div class="field"><label>What’s on the itinerary?</label><p class="desc">Pick any that sound like your trip.</p>
+              <div class="activity-list" id="activities">
+                <button class="activity" type="button" data-activity="sightseeing" aria-pressed="true">City walks</button>
+                <button class="activity" type="button" data-activity="hiking" aria-pressed="false">Hiking</button>
+                <button class="activity" type="button" data-activity="beach" aria-pressed="false">Beach</button>
+                <button class="activity" type="button" data-activity="business" aria-pressed="false">Meetings</button>
+                <button class="activity" type="button" data-activity="workout" aria-pressed="false">Workouts</button>
+                <button class="activity" type="button" data-activity="dining" aria-pressed="false">Dinner out</button>
+              </div>
+            </div>
+            <div class="field"><label for="weight-limit">Bag weight target (kg)</label><input id="weight-limit" type="number" min="1" max="40" step=".5" value="8"></div>
+            <button class="primary" id="build" type="button">Make my packing list <span aria-hidden="true">↗</span></button>
+            <div class="status" id="status" role="status" aria-live="polite">Your list will stay on this device when you come back.</div>
+
+            <div class="weather" aria-label="Destination weather">
+              <div class="weather-top"><div><div class="weather-city" id="weather-city">DESTINATION FORECAST</div><div class="temperature" id="temperature">—°</div><div class="condition" id="condition">The forecast will show up here</div></div><div class="weather-icon" id="weather-icon" aria-hidden="true">☁️</div></div>
+              <div class="weather-bottom"><span id="range">High —° · Low —°</span><span id="rain">Rain —</span></div>
+              <div class="weather-note" id="weather-note">A forecast is a guide, not a promise. Check again before you leave.</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="step">A useful rule of thumb</div><h2 style="margin-top:6px">Leave a little room.</h2>
+            <div class="tips-grid">
+              <div class="tip"><div class="tip-icon" aria-hidden="true">↗</div><div><strong>Wear the bulky things</strong><p>Travel in your heavier shoes or jacket instead of squeezing them into your bag.</p></div></div>
+              <div class="tip"><div class="tip-icon" aria-hidden="true">◌</div><div><strong>Choose things that work twice</strong><p>Neutral layers and clothes you can rewear usually beat a different outfit for every hour.</p></div></div>
+              <div class="tip"><div class="tip-icon" aria-hidden="true">⚖</div><div><strong>Check the actual weight</strong><p>These are estimates. Weigh your packed bag and check your carrier’s allowance.</p></div></div>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <section class="card" id="results" aria-labelledby="list-title">
+            <div class="results-head"><div><div class="step">02 / Ready when you are</div><h2 id="list-title">Your packing list</h2><p class="desc" id="list-subtitle">Tell us about your trip and we’ll make a starting point.</p></div><button class="quiet-btn" id="reset" type="button" hidden>Clear ticks</button></div>
+            <div class="empty" id="empty"><div class="empty-emoji" aria-hidden="true">🗺️</div>Your next trip, made a little simpler.<br>Fill in the details to get your list.</div>
+            <div id="packing-list" hidden>
+              <div class="stats">
+                <div class="stat"><strong id="packed-count">0/0</strong><span>ITEMS PACKED</span></div>
+                <div class="stat"><strong id="total-weight">0 kg</strong><span>EST. BAG WEIGHT</span></div>
+                <div class="stat"><strong id="trip-days">1 day</strong><span>AWAY</span></div>
+              </div>
+              <div class="progress-track" id="progress" role="progressbar" aria-label="Packing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+              <div class="progress-line"><span id="progress-label">Check off items as you pack.</span><button class="quiet-btn" id="copy" type="button">Copy list</button></div>
+              <div id="categories"></div>
+              <div class="advice" id="weight-advice"></div>
+              <div style="border-top:1px solid var(--line);margin-top:19px;padding-top:17px"><div style="font-size:12px;font-weight:750">Forgot something?</div><div class="custom-row"><input class="custom-input" id="custom-name" type="text" placeholder="Add an item" aria-label="Custom item name"><input class="custom-input" id="custom-weight" type="number" min="0" max="30" step=".05" value=".2" aria-label="Estimated item weight in kg"><button class="add-btn" id="add-item" type="button">Add</button></div><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+            </div>
+          </section>
+          <div class="card" style="background:#f0f0e8;box-shadow:none">
+            <div class="step">Before you zip it up</div><h2 style="margin-top:6px">One last check.</h2><p class="desc">Passport or ID, booking details, any prescriptions, and a charger are easy to forget. Keep anything you’ll need during the journey somewhere you can reach it.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>Made for people who’d rather spend less time packing.<br>Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · Your trip details stay in this browser.</footer>
+  </div>
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const STORE = "packlight-p32-v1";
+  const WEATHER_TTL = 12 * 60 * 60 * 1000;
+  const chosen = new Set(["sightseeing"]);
+  let items = [], trip = null, busy = false, lastSignature = "";
+  const codes = {0:"Clear sky",1:"Mostly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",56:"Freezing drizzle",57:"Freezing drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",66:"Freezing rain",67:"Freezing rain",71:"Light snow",73:"Snow",75:"Heavy snow",77:"Snow grains",80:"Rain showers",81:"Rain showers",82:"Heavy showers",85:"Snow showers",86:"Heavy snow",95:"Thunderstorm",96:"Thunderstorm with hail",99:"Thunderstorm with hail"};
+  const icons = {0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",56:"🌧️",57:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",66:"🌧️",67:"🌧️",71:"🌨️",73:"🌨️",75:"❄️",77:"❄️",80:"🌦️",81:"🌧️",82:"🌧️",85:"🌨️",86:"❄️",95:"⛈️",96:"⛈️",99:"⛈️"};
+  const today = new Date();
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const atNoon = s => new Date(`${s}T12:00:00`);
+  $("departure").value = iso(today);
+  $("departure").min = iso(today);
+  const threeDays = new Date(today); threeDays.setDate(threeDays.getDate()+2);
+  $("return").value = iso(threeDays); $("return").min = iso(today);
+  $("departure").addEventListener("change", () => {
+    $("return").min = $("departure").value;
+    if ($("return").value < $("departure").value) $("return").value = $("departure").value;
+  });
+
+  function status(message, error=false) {
+    $("status").textContent = message;
+    $("status").classList.toggle("error", error);
+  }
+  function readCache(key, ttl=WEATHER_TTL) {
+    try { const row = JSON.parse(localStorage.getItem(key)); if(row && Date.now()-row.saved < ttl) return row.value; } catch {}
+    return null;
+  }
+  function writeCache(key, value) { try { localStorage.setItem(key, JSON.stringify({saved:Date.now(),value})); } catch {} }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({
+      destination:$("destination").value, departure:$("departure").value, returning:$("return").value,
+      type:$("trip-type").value, limit:$("weight-limit").value, activities:[...chosen], items, trip, lastSignature
+    })); } catch {}
+  }
+  async function getJSON(url) {
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 9000);
+    try {
+      const response = await fetch(url, {signal:controller.signal, headers:{Accept:"application/json"}});
+      if(!response.ok) throw new Error("Weather service returned an error.");
+      return await response.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function forecastFor(city, departure, returning) {
+    const geoKey = "packlight-geo-"+city.trim().toLowerCase();
+    let place = readCache(geoKey, 30*24*60*60*1000);
+    if(!place) {
+      const data = await getJSON("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=en&format=json");
+      if(!data.results?.length) throw new Error("I couldn’t find that city. Check the spelling or try a nearby city.");
+      place = data.results[0]; writeCache(geoKey,place);
+    }
+    const cacheKey = `packlight-weather-${place.latitude.toFixed(2)}-${place.longitude.toFixed(2)}-${departure}`;
+    let daily = readCache(cacheKey);
+    let source = "cached";
+    if(!daily) {
+      daily = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=16`);
+      writeCache(cacheKey,daily); source="live";
+    }
+    const dates = daily.daily?.time || [];
+    const indices = dates.map((date,i)=>date>=departure && date<=returning ? i : -1).filter(i=>i>=0);
+    const use = indices.length ? indices : [0];
+    const highs=use.map(i=>daily.daily.temperature_2m_max[i]).filter(Number.isFinite);
+    const lows=use.map(i=>daily.daily.temperature_2m_min[i]).filter(Number.isFinite);
+    const rains=use.map(i=>daily.daily.precipitation_probability_max?.[i]).filter(Number.isFinite);
+    const weatherCodes=use.map(i=>daily.daily.weather_code[i]).filter(Number.isFinite);
+    const code=weatherCodes.length ? weatherCodes[Math.floor(weatherCodes.length/2)] : 3;
+    if(!highs.length || !lows.length) throw new Error("The forecast did not include usable temperatures.");
+    return {city:place.name+(place.country?", "+place.country:""),high:Math.round(Math.max(...highs)),low:Math.round(Math.min(...lows)),rain:rains.length?Math.max(...rains):null,code,condition:codes[code]||"Changeable conditions",source,daysAvailable:indices.length};
+  }
+  function fallbackWeather(city) {
+    const month = new Date().getMonth()+1, warm=[3,4,5,6,7,8,9].includes(month);
+    return {city,high:warm?30:22,low:warm?19:10,rain:null,code:2,condition:"Seasonal estimate",source:"estimate",daysAvailable:0};
+  }
+  function displayWeather(w) {
+    $("weather-city").textContent=w.city.toUpperCase();
+    $("temperature").textContent=Math.round((w.high+w.low)/2)+"°C";
+    $("condition").textContent=w.condition;
+    $("weather-icon").textContent=icons[w.code]||"⛅";
+    $("range").textContent=`High ${w.high}° · Low ${w.low}°`;
+    $("rain").textContent=w.rain==null?"Rain unknown":`Rain ${w.rain}%`;
+    $("weather-note").textContent=w.source==="estimate"
+      ?"Live weather wasn’t available. This is a rough seasonal estimate, not a real forecast. Please check conditions before leaving."
+      :w.daysAvailable===0
+      ?"Your dates are outside the available forecast window. Temperatures shown reflect the available forecast, not those exact dates."
+      :"Forecasts can change, especially further out. Check again before you leave.";
+  }
+  function add(name,category,weight,essential=true) {
+    items.push({id:"item-"+Math.random().toString(36).slice(2,10),name,category,weight,essential,checked:false});
+  }
+  function makeItems(days,type,w,acts) {
+    items=[];
+    const cold=w.low<=12, hot=w.high>=28, wet=w.rain>=40 || [51,53,55,61,63,65,80,81,82,95,96,99].includes(w.code), snow=w.low<=1 || [71,73,75,77,85,86].includes(w.code);
+    const clothes=type==="business"?1.1:type==="backpacking"?.75:1;
+    add("ID, passport or travel documents","Essentials",.08);
+    add("Phone","Essentials",.18); add("Phone charger","Essentials",.12);
+    add("Wallet and payment cards","Essentials",.08); add("Medication and small first-aid kit","Essentials",.15);
+    add("Reusable water bottle","Essentials",.18); add("Toothbrush and toothpaste","Toiletries",.12);
+    add("Travel-size toiletries","Toiletries",.3); add("Deodorant","Toiletries",.08,false);
+    add(`Underwear (${Math.min(days,7)} sets)`,"Clothing",.35*clothes);
+    add(`Socks (${Math.min(days,7)} pairs)`,"Clothing",.3*clothes);
+    add(`Everyday tops (${Math.min(days,7)})`,"Clothing",.9*clothes);
+    add(`Bottoms (${Math.max(1,Math.min(4,Math.ceil(days/2)))})`,"Clothing",.9*clothes);
+    add("Sleepwear","Clothing",.25*clothes); add("Comfortable walking shoes","Clothing",.65);
+    if(days>=4) add("Laundry bag","Essentials",.08,false);
+    if(cold) add("Warm sweater or fleece","Weather",.4);
+    if(cold||snow) add("Warm outer jacket","Weather",.75);
+    if(hot) {add("Lightweight, breathable layer","Weather",.25,false);add("Sunscreen","Weather",.1);add("Sunglasses and sun hat","Weather",.16,false);}
+    if(wet) add("Rain jacket or compact umbrella","Weather",.3);
+    if(snow) add("Warm hat and gloves","Weather",.2);
+    if(acts.includes("hiking")||type==="outdoors") {
+      add("Small daypack","Activities",.4);add("Trail shoes","Activities",.75);
+      add("Quick-dry clothing","Activities",.3);add("Trail snacks","Activities",.18,false);
+      if(cold)add("Extra insulating layer","Activities",.35);
+      add("Sun protection for the trail","Activities",.1,false);
+    }
+    if(acts.includes("beach")||type==="beach") {
+      add("Swimwear","Activities",.3);add("Sandals","Activities",.25);
+      add("Quick-dry towel","Activities",.35,false);
+      if(!hot)add("Light cover-up","Activities",.2,false);
+    }
+    if(acts.includes("business")||type==="business") {
+      add(`Work outfits (${Math.min(days,3)})`,"Activities",1.1);
+      add("Laptop","Electronics",1.4);add("Laptop charger","Electronics",.25);
+      add("Notebook and pen","Activities",.2,false);add("Meeting essentials","Activities",.1);
+    }
+    if(acts.includes("workout")) {add("Workout clothes","Activities",.45);add("Sports shoes","Activities",.6);add("Small quick-dry towel","Activities",.15,false);}
+    if(acts.includes("dining")) add("One smart-casual outfit","Clothing",.45,false);
+    if(acts.includes("sightseeing")) {add("Small day bag","Activities",.3);add("Portable power bank","Electronics",.22);}
+    if(type==="backpacking") {add("Microfibre towel","Activities",.2);add("Headlamp or small flashlight","Activities",.12,false);}
+    if(days>=5)add("One extra versatile outfit","Clothing",.3,false);
+    if(days>=7)add("Travel laundry detergent","Toiletries",.1,false);
+    add("Earphones","Electronics",.05,false);
+  }
+  function updateStats() {
+    const checked=items.filter(i=>i.checked).length,total=items.reduce((sum,i)=>sum+i.weight,0);
+    const percent=items.length?Math.round(checked/items.length*100):0;
+    $("packed-count").textContent=`${checked}/${items.length}`;
+    $("total-weight").textContent=total.toFixed(1)+" kg";
+    const days=trip?.days||1; $("trip-days").textContent=`${days} day${days===1?"":"s"}`;
+    $("progress-fill").style.width=percent+"%";$("progress").setAttribute("aria-valuenow",percent);
+    $("progress-label").textContent=percent===100?"All packed. Have a good trip!":`${percent}% packed · ${items.length-checked} left`;
+    const limit=Number($("weight-limit").value)||8;
+    $("weight-advice").textContent=total>limit
+      ?`Your list comes to about ${(total-limit).toFixed(2)} kg over your ${limit} kg target. Start with the essentials, rewear versatile clothes and reconsider optional extras.`
+      :`The estimated list is within your ${limit} kg target. Item weights are rough averages — your actual bag may weigh more or less.`;
+  }
+  function renderList() {
+    $("empty").hidden=true;$("packing-list").hidden=false;$("reset").hidden=false;
+    $("list-subtitle").textContent=`${trip.city} · ${trip.days} day${trip.days===1?"":"s"} · Built around your plans`;
+    const root=$("categories");root.replaceChildren();
+    const categoryOrder=["Essentials","Clothing","Weather","Toiletries","Activities","Electronics"];
+    categoryOrder.forEach(category=>{
+      const group=items.filter(item=>item.category===category);if(!group.length)return;
+      const section=document.createElement("section");section.className="category";
+      const head=document.createElement("div");head.className="category-head";
+      const title=document.createElement("strong");title.textContent=category;
+      const count=document.createElement("span");count.className="category-count";
+      const refreshCount=()=>count.textContent=`${group.filter(i=>i.checked).length} of ${group.length}`;
+      refreshCount();head.append(title,count);section.append(head);
+      const list=document.createElement("div");list.className="items";
+      group.forEach(item=>{
+        const label=document.createElement("label");label.className="item";
+        const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.checked=!!item.checked;checkbox.setAttribute("aria-label",item.name);
+        const name=document.createElement("span");name.className="item-name";name.textContent=item.name;
+        const weight=document.createElement("span");weight.className="item-weight";weight.textContent=item.weight.toFixed(2)+" kg";
+        checkbox.addEventListener("change",()=>{item.checked=checkbox.checked;refreshCount();updateStats();save();});
+        label.append(checkbox,name,weight);list.append(label);
+      });
+      section.append(list);root.append(section);
+    });
+    updateStats();save();
+  }
+  function currentSignature(city,departure,returning,type,activities,limit) {
+    return JSON.stringify({city:city.toLowerCase(),departure,returning,type,activities:[...activities].sort(),limit});
+  }
+  async function build() {
+    if(busy)return;
+    const city=$("destination").value.trim(),departure=$("departure").value,returning=$("return").value,type=$("trip-type").value,limit=Number($("weight-limit").value);
+    if(!city){status("Add a destination city to get started.",true);$("destination").focus();return;}
+    if(!departure||!returning||returning<departure){status("Choose a return date that is on or after your departure.",true);return;}
+    if(!Number.isFinite(limit)||limit<1||limit>40){status("Choose a bag target between 1 and 40 kg.",true);return;}
+    const days=Math.max(1,Math.round((atNoon(returning)-atNoon(departure))/86400000)+1);
+    const signature=currentSignature(city,departure,returning,type,chosen,limit);
+    if(signature===lastSignature&&items.length){status("Your list is up to date. Change a trip detail to rebuild it.");return;}
+    busy=true;$("build").disabled=true;$("build").textContent="Checking the forecast…";status("Looking up the destination and forecast.");
+    let w;
+    try {
+      w=await forecastFor(city,departure,returning);
+      displayWeather(w);status(w.source==="cached"?"Using a recent cached forecast.":"Forecast loaded.");
+    } catch(error) {
+      const saved=loadSaved();
+      if(saved?.trip?.weather && saved.trip.city.toLowerCase().includes(city.toLowerCase())) {
+        w={...saved.trip.weather,source:"cached"};displayWeather(w);status("Weather service unavailable. Showing your saved forecast.",true);
+      } else {
+        w=fallbackWeather(city);displayWeather(w);status((error?.message||"Forecast unavailable.")+" Showing a seasonal estimate instead.",true);
+      }
+    }
+    trip={city:w.city||city,days,departure,returning,type,activities:[...chosen],weather:w};
+    makeItems(days,type,w,[...chosen]);lastSignature=signature;renderList();save();
+    busy=false;$("build").disabled=false;$("build").innerHTML='Refresh packing list <span aria-hidden="true">↗</span>';
+    $("results").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  }
+  $("activities").querySelectorAll("[data-activity]").forEach(button=>button.addEventListener("click",()=>{
+    const key=button.dataset.activity;
+    if(chosen.has(key)){if(chosen.size>1)chosen.delete(key);}else chosen.add(key);
+    $("activities").querySelectorAll("[data-activity]").forEach(b=>b.setAttribute("aria-pressed",String(chosen.has(b.dataset.activity))));
+  }));
+  $("build").addEventListener("click",build);
+  $("reset").addEventListener("click",()=>{items.forEach(item=>item.checked=false);renderList();status("Packing ticks cleared. Your list is ready to use again.");});
+  $("weight-limit").addEventListener("change",()=>{if(items.length)updateStats();});
+  $("add-item").addEventListener("click",()=>{
+    const name=$("custom-name").value.trim(),weight=Number($("custom-weight").value);
+    if(!name){$("toast").textContent="Give your item a name first.";return;}
+    if(!Number.isFinite(weight)||weight<0||weight>30){$("toast").textContent="Enter an estimated weight between 0 and 30 kg.";return;}
+    items.push({id:"custom-"+Date.now(),name,category:"Essentials",weight,essential:false,checked:false});
+    $("custom-name").value="";renderList();$("toast").textContent="Added to your list.";
+  });
+  $("custom-name").addEventListener("keydown",e=>{if(e.key==="Enter")$("add-item").click();});
+  $("copy").addEventListener("click",async()=>{
+    const text=[`Packing list — ${trip?.city||$("destination").value}`,`Estimated weight: ${items.reduce((s,i)=>s+i.weight,0).toFixed(2)} kg`,"",...items.map(i=>`${i.checked?"[x]":"[ ]"} ${i.name} (${i.weight.toFixed(2)} kg)`)].join("\n");
+    try {
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(text);
+      else {const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.append(area);area.select();const ok=document.execCommand("copy");area.remove();if(!ok)throw new Error("copy failed");}
+      $("toast").textContent="Copied. Paste it into your notes.";
+    } catch {$("toast").textContent="Copy is unavailable here. You can still select items and copy them manually.";}
+  });
+  function loadSaved(){try{return JSON.parse(localStorage.getItem(STORE));}catch{return null;}}
+  function restore() {
+    const saved=loadSaved();if(!saved)return;
+    try {
+      $("destination").value=saved.destination||"";
+      if(saved.departure)$("departure").value=saved.departure;
+      if(saved.returning)$("return").value=saved.returning;
+      if(saved.type)$("trip-type").value=saved.type;
+      if(saved.limit)$("weight-limit").value=saved.limit;
+      if(Array.isArray(saved.activities)){chosen.clear();saved.activities.forEach(a=>chosen.add(a));if(!chosen.size)chosen.add("sightseeing");}
+      $("activities").querySelectorAll("[data-activity]").forEach(b=>b.setAttribute("aria-pressed",String(chosen.has(b.dataset.activity))));
+      if(saved.trip&&Array.isArray(saved.items)&&saved.items.length){
+        trip=saved.trip;items=saved.items;lastSignature=saved.lastSignature||"";
+        if(trip.weather)displayWeather(trip.weather);
+        renderList();status("Welcome back — your last list was saved on this device.");
+      }
+    } catch {status("A previous list couldn’t be restored. You can start a fresh one.");}
+  }
+  restore();
+})();
+</script>
+</body>
+</html>
